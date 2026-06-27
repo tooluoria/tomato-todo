@@ -1,10 +1,19 @@
-const CACHE = 'pomodoro-v1';
-const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'];
+const CACHE = 'pomodoro-v2';
+const BASE = '/tomato-todo';
 
 self.addEventListener('install', function(e) {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(function(cache) {
-      return cache.addAll(ASSETS);
+      return cache.addAll([
+        BASE + '/',
+        BASE + '/index.html',
+        BASE + '/style.css',
+        BASE + '/app.js',
+        BASE + '/manifest.json',
+        BASE + '/icons/icon-192.png',
+        BASE + '/icons/icon-512.png'
+      ]);
     })
   );
 });
@@ -18,16 +27,17 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
-  e.respondWith(
-    caches.match(e.request).then(function(r) {
-      return r || fetch(e.request).then(function(resp) {
-        return caches.open(CACHE).then(function(cache) {
-          if (e.request.url.startsWith(self.location.origin)) {
+  var url = new URL(e.request.url);
+  if (url.pathname.startsWith(BASE)) {
+    e.respondWith(
+      caches.match(e.request).then(function(r) {
+        return r || fetch(e.request).then(function(resp) {
+          return caches.open(CACHE).then(function(cache) {
             cache.put(e.request, resp.clone());
-          }
-          return resp;
+            return resp;
+          });
         });
-      });
-    })
-  );
+      })
+    );
+  }
 });
