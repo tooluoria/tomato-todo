@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄Todo</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="番茄Todo">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+  <link rel="apple-touch-startup-image" href="icons/icon-512.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">🍅</span>
+        <h1>番茄Todo</h1>
+      </div>
+      <div class="header-stats">
+        <span class="stat-badge" id="todayCount">今日 0</span>
+      </div>
+    </header>
+    <main class="main-content">
+      <section class="timer-section">
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-mode="focus">专注</button>
+          <button class="mode-tab" data-mode="shortBreak">短休</button>
+          <button class="mode-tab" data-mode="longBreak">长休</button>
+        </div>
+        <div class="timer-display">
+          <svg class="timer-ring" viewBox="0 0 220 220">
+            <circle class="ring-bg" cx="110" cy="110" r="100" />
+            <circle class="ring-progress" cx="110" cy="110" r="100"
+              style="stroke-dasharray: 628.32; stroke-dashoffset: 0;" />
+          </svg>
+          <div class="timer-text">
+            <span class="time" id="timerDisplay">25:00</span>
+            <span class="label" id="timerLabel">专注时间</span>
+          </div>
+        </div>
+        <div class="timer-controls">
+          <button class="btn btn-primary" id="startBtn">开始</button>
+          <button class="btn btn-secondary" id="resetBtn">重置</button>
+        </div>
+        <div class="pomodoro-count" id="pomodoroCount">
+          <span class="count-dot filled"></span>
+          <span class="count-dot"></span>
+          <span class="count-dot"></span>
+          <span class="count-dot"></span>
+        </div>
+      </section>
+      <section class="todo-section">
+        <div class="section-header">
+          <h2>任务清单</h2>
+          <span class="todo-count" id="todoCount">0</span>
+        </div>
+        <form class="todo-input-row" id="todoForm">
+          <input type="text" id="todoInput" placeholder="添加一个任务..." autocomplete="off">
+          <button type="submit" class="btn btn-add" aria-label="添加">＋</button>
+        </form>
+        <ul class="todo-list" id="todoList"></ul>
+      </secti
+      <!-- Whitelist Section -->
+      <section class="whitelist-section">
+        <div class="section-header">
+          <h2>专注白名单</h2>
+          <span class="todo-count" id="whitelistCount">0</span>
+        </div>
+        <p class="section-desc">专注期间允许使用的应用或网站</p>
+        <form class="todo-input-row" id="whitelistForm">
+          <input type="text" id="whitelistInput" placeholder="添加白名单项目..." autocomplete="off">
+          <button type="submit" class="btn btn-add" aria-label="添加">＋</button>
+        </form>
+        <div class="tag-list" id="whitelistList"></div>
+      </section>
+
+      <!-- Habits Section -->
+      <section class="habits-section">
+        <div class="section-header">
+          <h2>小习惯打卡</h2>
+          <span class="todo-count" id="habitsCount">0 项</span>
+        </div>
+        <p class="section-desc">完成番茄钟后将时间记录到对应习惯</p>
+        <form class="todo-input-row" id="habitForm">
+          <input type="text" id="habitInput" placeholder="添加新习惯..." autocomplete="off">
+          <button type="submit" class="btn btn-add" aria-label="添加">＋</button>
+        </form>
+        <ul class="habit-list" id="habitList"></ul>
+      </section>
+
+      <!-- Habit Log Prompt Modal -->
+      <div class="modal-overlay" id="habitLogModal">
+        <div class="modal modal-sm">
+          <div class="modal-header">
+            <h3>记录到习惯</h3>
+          </div>
+          <div class="modal-body" id="habitLogBody">
+            <p class="habit-log-hint">选择要记录本次专注的习惯：</p>
+            <div class="habit-log-options" id="habitLogOptions"></div>
+            <button class="btn btn-secondary habit-log-skip" id="habitLogSkip">跳过</button>
+          </div>
+        </div>
+      </div>
+
+on>
+      <section class="stats-section">
+        <h2>今日统计</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="statPomodoros">0</span>
+            <span class="stat-label">完成番茄</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statMinutes">0</span>
+            <span class="stat-label">专注分钟</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statTasks">0</span>
+            <span class="stat-label">完成任务</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <audio id="notificationSound" preload="auto"></audio>
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>设置</h3>
+        <button class="modal-close" id="settingsClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <label>专注时长 (分钟)</label>
+          <input type="number" id="settingFocus" min="1" max="120" value="25">
+        </div>
+        <div class="setting-row">
+          <label>短休时长 (分钟)</label>
+          <input type="number" id="settingShort" min="1" max="60" value="5">
+        </div>
+        <div class="setting-row">
+          <label>长休时长 (分钟)</label>
+          <input type="number" id="settingLong" min="1" max="90" value="15">
+        </div>
+        <div class="setting-row">
+          <label>长休间隔 (番茄数)</label>
+          <input type="number" id="settingLongInterval" min="2" max="10" value="4">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="settingsSave">保存</button>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+</body>
+</html>
